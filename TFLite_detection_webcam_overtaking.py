@@ -313,6 +313,7 @@ while True:
                 GPIO.output(in2, GPIO.LOW)
                 GPIO.output(in4, GPIO.LOW)
                 GPIO.output(in3, GPIO.HIGH)
+                
         
             #Turn off the engines when detect a person
             if object_name in person_classes:
