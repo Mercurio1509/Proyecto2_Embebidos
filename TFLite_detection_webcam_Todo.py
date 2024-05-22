@@ -297,13 +297,33 @@ try:
                 cv2.rectangle(frame, (xmin, label_ymin-labelSize[1]-10), (xmin+labelSize[0], label_ymin+baseLine-10), (255, 255, 255), cv2.FILLED) # Draw white box to put label text in
                 cv2.putText(frame, label, (xmin, label_ymin-7), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2) # Draw label text
                 if object_name in vehicle_classes:
-                    print("stop")
-                    #stop_motors()
-                    GPIO.output(in1,GPIO.LOW)
-                    GPIO.output(in2,GPIO.LOW)
-                    GPIO.output(in4,GPIO.LOW)
-                    GPIO.output(in3,GPIO.LOW)
-                    print ("Motores apagados")
+                    print("Overtaking maneuver")
+                    # Turn left
+                    GPIO.output(in1, GPIO.LOW)
+                    GPIO.output(in2, GPIO.HIGH)
+                    GPIO.output(in4, GPIO.LOW)
+                    GPIO.output(in3, GPIO.HIGH)
+                    sleep(3)  # Adjust the time for the maneuver
+                    
+                    # Move forward
+                    GPIO.output(in1, GPIO.HIGH)
+                    GPIO.output(in2, GPIO.LOW)
+                    GPIO.output(in4, GPIO.LOW)
+                    GPIO.output(in3, GPIO.HIGH)
+                    sleep(5)  # Adjust the time for moving forward
+                    
+                    # Turn right to get back to the original lane
+                    GPIO.output(in1, GPIO.HIGH)
+                    GPIO.output(in2, GPIO.LOW)
+                    GPIO.output(in4, GPIO.HIGH)
+                    GPIO.output(in3, GPIO.LOW)
+                    sleep(3)  # Adjust the time for the maneuver
+                    
+                    # Move forward to complete the overtaking
+                    GPIO.output(in1, GPIO.HIGH)
+                    GPIO.output(in2, GPIO.LOW)
+                    GPIO.output(in4, GPIO.LOW)
+                    GPIO.output(in3, GPIO.HIGH)
                 if object_name in person_classes:
                     print("Stopping")
                     #stop_motors()
