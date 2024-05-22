@@ -17,6 +17,7 @@
 
 # Import packages
 import os
+#import keyboard
 import argparse
 import cv2
 import numpy as np
@@ -59,8 +60,8 @@ q=GPIO.PWM(en_b,1000)
 
 #Start the PWM and initial messages
 
-p.start(25)
-q.start(25)
+p.start(50)
+q.start(50)
 print("\n")
 print("The default speed & direction of motor is LOW & Forward.....")
 print("r-run s-stop f-forward b-backward l-low m-medium h-high e-exit")
@@ -226,17 +227,18 @@ def initialize_motors():
     print("Motores encendidos")
     
 
-def stop_motors():
-    GPIO.output(in1,GPIO.LOW)
-    GPIO.output(in2,GPIO.LOW)
-    GPIO.output(in4,GPIO.LOW)
-    GPIO.output(in3,GPIO.LOW)
-    print ("Motores apagados")
+#def stop_motors():
+ #   GPIO.output(in1,GPIO.LOW)
+  #  GPIO.output(in2,GPIO.LOW)
+  #  GPIO.output(in4,GPIO.LOW)
+  #  GPIO.output(in3,GPIO.LOW)
+  #  print ("Motores apagados")
 
 initialize_motors()
 
 while True:
-
+    #if keyboard.is_pressed('q'):
+        #break
     # Start timer (for calculating frame rate)
     t1 = cv2.getTickCount()
 
@@ -265,7 +267,10 @@ while True:
     # Loop over all detections and draw detection box if confidence is above minimum threshold
     flag_detection = False
     for i in range(len(scores)):
+        
         if ((scores[i] > min_conf_threshold) and (scores[i] <= 1.0)):
+
+
 
             # Get bounding box coordinates and draw box
             # Interpreter can return coordinates that are outside of image dimensions, need to force them to be within image using max() and min()
@@ -287,13 +292,22 @@ while True:
             cv2.putText(frame, label, (xmin, label_ymin-7), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2) # Draw label text
             if object_name in vehicle_classes:
                 print("stop")
-                stop_motors()
-            #Turn off the engines when detect a person
+                #stop_motors()
+                GPIO.output(in1,GPIO.LOW)
+                GPIO.output(in2,GPIO.LOW)
+                GPIO.output(in4,GPIO.LOW)
+                GPIO.output(in3,GPIO.LOW)
+                print ("Motores apagados")
             if object_name in person_classes:
-                print ("Stopping")
-                stop_motors()
+                print("Stopping")
+                #stop_motors()
+                GPIO.output(in1,GPIO.LOW)
+                GPIO.output(in2,GPIO.LOW)
+                GPIO.output(in4,GPIO.LOW)
+                GPIO.output(in3,GPIO.LOW)
+                print ("Motores apagados")
             else:
-            	print ("Continue")
+                print("Continue")
                 initialize_motors()
 
     # Draw framerate in corner of frame
@@ -301,14 +315,16 @@ while True:
     
     # All the results have been drawn on the frame, so it's time to display it.
     
-    if flag_detection == True:
-    	continue
-    
-    else:
-    	print("Nothing")
-    	initialize_motors()
-    obj = carril.HandCodedLaneFollower()
-    img_out= obj.follow_lane(frame)
+    #if flag_detection == True:
+    #	continue
+ 
+ 
+    #else:
+    #    print("Nothing")
+     #   initialize_motors()
+    obj=carril.HandCodedLaneFollower()
+    img_out = obj.follow_lane(frame)
+        
     
     #annotator = Annotator(img_out, line_width=2, pil=not ascii)
     
@@ -320,10 +336,15 @@ while True:
     t2 = cv2.getTickCount()
     time1 = (t2-t1)/freq
     frame_rate_calc= 1/time1
+   
+   # user_input = input("Enter 'q' to quit: ")
+
+    #if user_input == 'q':
+     #   sys.exit("You chose to quit the program.")
 
     # Press 'q' to quit
-    if cv2.waitKey(1) == ord('q'):
-        break
+   # if cv2.waitKey(1) == ord('q'):
+    #    break
 
 # Clean up
 cv2.destroyAllWindows()
