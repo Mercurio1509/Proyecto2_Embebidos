@@ -231,7 +231,7 @@ def stop_motors():
     GPIO.output(in2,GPIO.LOW)
     GPIO.output(in4,GPIO.LOW)
     GPIO.output(in3,GPIO.LOW)
-    print ("Motores apagdos")
+    print ("Motores apagados")
 
 initialize_motors()
 
@@ -287,17 +287,14 @@ while True:
             cv2.putText(frame, label, (xmin, label_ymin-7), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2) # Draw label text
             if object_name in vehicle_classes:
                 print("stop")
-                GPIO.output(in1,GPIO.LOW)
-                GPIO.output(in2,GPIO.LOW)
-                GPIO.output(in4,GPIO.LOW)
-                GPIO.output(in3,GPIO.LOW)
+                stop_motors()
             #Turn off the engines when detect a person
             if object_name in person_classes:
                 print ("Stopping")
-                GPIO.output(in1,GPIO.LOW)
-                GPIO.output(in2,GPIO.LOW)
-                GPIO.output(in4,GPIO.LOW)
-                GPIO.output(in3,GPIO.LOW)
+                stop_motors()
+            else:
+            	print ("Continue")
+                initialize_motors()
 
     # Draw framerate in corner of frame
     cv2.putText(frame,'FPS: {0:.2f}'.format(frame_rate_calc),(30,50),cv2.FONT_HERSHEY_SIMPLEX,1,(255,255,0),2,cv2.LINE_AA)
@@ -309,7 +306,7 @@ while True:
     
     else:
     	print("Nothing")
-    
+    	initialize_motors()
     obj = carril.HandCodedLaneFollower()
     img_out= obj.follow_lane(frame)
     
