@@ -62,10 +62,10 @@ q=GPIO.PWM(en_b,1000)
 
 
 def initialize_motors():
-    GPIO.output(in1,GPIO.HIGH)
-    GPIO.output(in2,GPIO.LOW)
-    GPIO.output(in4,GPIO.LOW)
-    GPIO.output(in3,GPIO.HIGH)
+    GPIO.output(in1,GPIO.LOW)
+    GPIO.output(in2,GPIO.HIGH)
+    GPIO.output(in4,GPIO.HIGH)
+    GPIO.output(in3,GPIO.LOW)
     print("Motores encendidos")
 
 
@@ -393,8 +393,8 @@ try:
         #if user_input == 'q':
         #   sys.exit("You chose to quit the program.")
         # Press 'q' to quit
-        if cv2.waitKey(1) == ord('q'):
-            break
+        #if cv2.waitKey(1) == ord('q'):
+         #   break
 
 except KeyboardInterrupt:
     stop_motors()
