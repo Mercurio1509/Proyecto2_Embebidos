@@ -225,6 +225,17 @@ time.sleep(1)
 
 #for frame1 in camera.capture_continuous(rawCapture, format="bgr",use_video_port=True):
 
+class OvertakeState:
+    IDLE = 0
+    OVERTAKE_LEFT = 1
+    MOVE_FORWARD = 2
+    OVERTAKE_RIGHT = 3
+    RECOVER = 4
+
+# Initialize variables
+overtake_state = OvertakeState.IDLE
+overtake_start_time = None
+
 try:
 
     initialize_motors()
@@ -306,36 +317,49 @@ try:
                     GPIO.output(in4,GPIO.LOW)
                     GPIO.output(in3,GPIO.LOW)
                     print ("Motores apagados")
-                #Maneuver when vehicle 
-                if object_name in vehicle_classes:
-                    print("Overtaking maneuver")
-                    # Turn left
-                    GPIO.output(in1, GPIO.LOW)
-                    GPIO.output(in2, GPIO.HIGH)
-                    GPIO.output(in4, GPIO.LOW)
-                    GPIO.output(in3, GPIO.HIGH)
-                    sleep(2)  # Adjust the time for the maneuver
-                    
-                    # Move forward
-                    GPIO.output(in1, GPIO.HIGH)
-                    GPIO.output(in2, GPIO.LOW)
-                    GPIO.output(in4, GPIO.LOW)
-                    GPIO.output(in3, GPIO.HIGH)
-                    sleep(2.5)  # Adjust the time for moving forward
-                    
-                    # Turn right to get back to the original lane
-                    GPIO.output(in1, GPIO.HIGH)
-                    GPIO.output(in2, GPIO.LOW)
-                    GPIO.output(in4, GPIO.HIGH)
-                    GPIO.output(in3, GPIO.LOW)
-                    sleep(2)  # Adjust the time for the maneuver
-                    
-                    # Move forward to complete the overtaking (CONTINUING)
-                    initialize_motors()
 
-                else:
-                    print("Continue")
+                if object_name in vehicle_classes:
+                    obstacle_detected = True                   
+
+                #Maneuver when vehicle 
+            if obstacle_detected:
+                    if overtake_state == OvertakeState.IDLE:
+                        print("Starting overtaking maneuver")
+                        GPIO.output(in1, GPIO.LOW)
+                        GPIO.output(in2, GPIO.HIGH)
+                        GPIO.output(in4, GPIO.LOW)
+                        GPIO.output(in3, GPIO.HIGH)
+                        overtake_state = OvertakeState.OVERTAKE_LEFT
+                        overtake_start_time = time.time()
+                    elif overtake_state == OvertakeState.OVERTAKE_LEFT:
+                        if time.time() - overtake_start_time > 2:
+                            print("Moving forward during overtaking")
+                            GPIO.output(in1, GPIO.HIGH)
+                            GPIO.output(in2, GPIO.LOW)
+                            GPIO.output(in4, GPIO.LOW)
+                            GPIO.output(in3, GPIO.HIGH)
+                            overtake_state = OvertakeState.MOVE_FORWARD
+                            overtake_start_time = time.time()
+                    elif overtake_state == OvertakeState.MOVE_FORWARD:
+                        if time.time() - overtake_start_time > 2.5:
+                            print("Turning right to recover original lane")
+                            GPIO.output(in1, GPIO.HIGH)
+                            GPIO.output(in2, GPIO.LOW)
+                            GPIO.output(in4, GPIO.HIGH)
+                            GPIO.output(in3, GPIO.LOW)
+                            overtake_state = OvertakeState.OVERTAKE_RIGHT
+                            overtake_start_time = time.time()
+                    elif overtake_state == OvertakeState.OVERTAKE_RIGHT:
+                        if time.time() - overtake_start_time > 2:
+                            print("Completing overtaking maneuver")
+                            initialize_motors()
+                            overtake_state = OvertakeState.RECOVER
+
+            else:
+                if overtake_state == OvertakeState.RECOVER or overtake_state == OvertakeState.IDLE:
+                    print("Continuing on the lane")
                     initialize_motors()
+                    overtake_state = OvertakeState.IDLE
 
         # Draw framerate in corner of frame
         cv2.putText(frame,'FPS: {0:.2f}'.format(frame_rate_calc),(30,50),cv2.FONT_HERSHEY_SIMPLEX,1,(255,255,0),2,cv2.LINE_AA)
